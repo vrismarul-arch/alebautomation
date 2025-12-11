@@ -57,22 +57,43 @@ app.post("/send-mail", async (req, res) => {
       },
     });
 
+    // --------------------------
+    // UI EMAIL TEMPLATE (CONTACT)
+    // --------------------------
     const mailOptions = {
       from: `"ALEB Website Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.RECEIVER_EMAIL,
+      to: process.env.RECEIVER_EMAIL, cc: process.env.CC_EMAIL || "",
       subject: "New Website Contact Form Submission",
+
       html: `
-        <h2>New Contact Message</h2>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Phone:</b> ${number}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b> ${message}</p>
+      <div style="font-family: Poppins, sans-serif; padding: 20px; background: #f4f4f4;">
+        <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+
+          <h2 style="color: #1a237e; border-bottom: 2px solid #eee; padding-bottom: 8px;">
+            📩 New Contact Message
+          </h2>
+
+          <p><b>Name:</b> ${name} ${lastName || ""}</p>
+          <p><b>Phone:</b> ${number || "N/A"}</p>
+          <p><b>Email:</b> ${email}</p>
+
+          <div style="margin-top: 15px; padding: 15px; background: #fafafa; border-left: 4px solid #1a237e;">
+            <b>Message:</b>
+            <p>${message}</p>
+          </div>
+
+          <p style="margin-top: 20px; font-size: 12px; color: #777;">
+            This message was sent via <b>ALEB Website Contact Form</b>.
+          </p>
+
+        </div>
+      </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-
     res.json({ success: true, message: "Message sent successfully!" });
+
   } catch (error) {
     console.log("Email Error:", error);
     res.status(500).json({ success: false, message: "Email sending failed!" });
@@ -106,28 +127,55 @@ app.post("/career-apply", upload.single("resume"), async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER_careers,
+        pass: process.env.EMAIL_PASS_careers,
       },
     });
 
+    // --------------------------
+    // UI EMAIL TEMPLATE (CAREER)
+    // --------------------------
     const mailOptions = {
-      from: `"ALEB Careers Submission" <${process.env.EMAIL_USER}>`,
-      to: process.env.RECEIVER_EMAIL,
+      from: `"ALEB Careers Submission" <${process.env.EMAIL_USER_careers}>`,
+      to: process.env.RECEIVER_EMAIL, cc: process.env.CC_EMAIL || "",
       subject: `New Career Application – ${fullName} (${position})`,
+      
       html: `
-        <h2>New Career Application Received</h2>
-        <p><b>Name:</b> ${fullName}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <p><b>Position:</b> ${position}</p>
-        <p><b>Experience:</b> ${experience}</p>
-        <p><b>Qualification:</b> ${qualification}</p>
-        <p><b>Current Company:</b> ${currentCompany}</p>
-        <p><b>Message:</b> ${message}</p>
-        <p><b>Portfolio:</b> ${portfolio}</p>
-        <p><b>Resume Attached Below</b></p>
+      <div style="font-family: Poppins, sans-serif; padding: 20px; background: #f4f4f4;">
+        <div style="max-width: 650px; margin: auto; background: white; border-radius: 10px; padding: 25px; box-shadow: 0 0 10px rgba(0,0,0,0.08);">
+
+          <h2 style="color: #1a237e; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+            🧑‍💼 New Career Application
+          </h2>
+
+          <table style="width: 100%; margin-top: 15px;">
+            <tr><td><b>Name:</b></td><td>${fullName}</td></tr>
+            <tr><td><b>Email:</b></td><td>${email}</td></tr>
+            <tr><td><b>Phone:</b></td><td>${phone}</td></tr>
+            <tr><td><b>Position Applied:</b></td><td>${position}</td></tr>
+            <tr><td><b>Experience:</b></td><td>${experience || "N/A"}</td></tr>
+            <tr><td><b>Qualification:</b></td><td>${qualification || "N/A"}</td></tr>
+            <tr><td><b>Current Company:</b></td><td>${currentCompany || "N/A"}</td></tr>
+            <tr><td><b>Portfolio:</b></td><td>${portfolio || "N/A"}</td></tr>
+          </table>
+
+          <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-left: 4px solid #1a237e;">
+            <b>Message:</b>
+            <p>${message || "No additional message provided."}</p>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <b>📎 Resume Attached</b>
+          </div>
+
+          <p style="margin-top: 20px; font-size: 12px; color: #777;">
+            Submitted via <b>ALEB Careers Page</b>.
+          </p>
+
+        </div>
+      </div>
       `,
+
       attachments: [
         {
           filename: req.file.originalname,
@@ -139,6 +187,7 @@ app.post("/career-apply", upload.single("resume"), async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.json({ success: true, message: "Application submitted successfully!" });
+
   } catch (err) {
     console.log("Career Email Error:", err);
     res.status(500).json({
